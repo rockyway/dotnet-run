@@ -1,0 +1,25 @@
+{
+  "name": "dotnetrun",
+  "version": "1.0.0",
+  "description": "Build a .NET project, copy its output to a temp dir, and run it from there — leaving bin/ unlocked so coding agents/tools can rebuild.",
+  "type": "module",
+  "bin": {
+    "dotnetrun": "bin/dotnetrun.js"
+  },
+  "engines": {
+    "node": ">=22.4.0"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "dotnet",
+    "build",
+    "run",
+    "robocopy",
+    "cli"
+  ],
+  "license": "MIT"
+}
