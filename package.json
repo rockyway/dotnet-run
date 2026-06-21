@@ -1,10 +1,12 @@
 {
-  "name": "dnrun",
+  "name": "dotnet-shadowrun",
   "version": "1.0.0",
   "description": "Build a .NET project, copy its output to a temp dir, and run it from there — leaving bin/ unlocked so coding agents/tools can rebuild.",
   "type": "module",
   "bin": {
-    "dotnetrun": "bin/dotnetrun.js"
+    "dotnetrun": "bin/dotnetrun.js",
+    "dnrun": "bin/dotnetrun.js",
+    "dotnet-shadowrun": "bin/dotnetrun.js"
   },
   "engines": {
     "node": ">=22.4.0"
