@@ -1,5 +1,5 @@
 {
-  "name": "dotnet-shadowrun",
+  "name": "dnrun",
   "version": "1.0.0",
   "description": "Build a .NET project, copy its output to a temp dir, and run it from there — leaving bin/ unlocked so coding agents/tools can rebuild.",
   "type": "module",

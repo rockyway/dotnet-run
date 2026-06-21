@@ -12,7 +12,7 @@ Windows), and launches from the copy.
 ## Install
 
 ```sh
-npm install -g dotnet-shadowrun   # installs the global `dotnetrun` command
+npm install -g dnrun   # installs the global `dotnetrun` command
 ```
 
 Or, for local development of this tool:
@@ -22,8 +22,7 @@ Or, for local development of this tool:
 npm link        # exposes the global `dotnetrun` command
 ```
 
-> The npm package is `dotnet-shadowrun` (it shadow-copies build output to a temp
-> dir and runs from there), but the command it installs is **`dotnetrun`**.
+> The npm package is `dnrun`, but the command it installs is **`dotnetrun`**.
 
 Requires Node.js >= 22.4 and the .NET SDK on `PATH`.
 
