@@ -12,14 +12,30 @@
   "files": [
     "bin",
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "dotnet",
     "build",
     "run",
     "robocopy",
-    "cli"
+    "cli",
+    "hot-reload",
+    "agent",
+    "developer-tools"
   ],
-  "license": "MIT"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rockyway/dotnet-run.git"
+  },
+  "homepage": "https://github.com/rockyway/dotnet-run#readme",
+  "bugs": {
+    "url": "https://github.com/rockyway/dotnet-run/issues"
+  },
+  "author": "Tam Tran <tamtranthien@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }
