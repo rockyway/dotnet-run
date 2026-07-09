@@ -120,7 +120,7 @@ function scanForExe(root) {
 }
 
 function looksExecutable(file) {
-  // On *nix the apphost binary has no extension (e.g. "Rephlo", not "Rephlo.dll").
+  // On *nix the apphost binary has no extension (e.g. "TodoApp", not "TodoApp.dll").
   return extname(file) === '';
 }
 

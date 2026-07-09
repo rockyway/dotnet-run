@@ -6,12 +6,13 @@ import { join } from 'node:path';
  * Launch the copied executable from the temp run directory.
  *
  * @param {string} tempDir   run directory (cwd for the process)
- * @param {string} exeName   executable file name (e.g. Rephlo.exe)
+ * @param {string} exeName   executable file name (e.g. TodoApp.exe)
  * @param {string[]} appArgs args forwarded to the executable
  * @param {boolean} detach   true = launch and return; false = attach + wait
+ * @param {Record<string,string>} [env] environment for the child (default: process.env)
  * @returns {Promise<number>} exit code (0 when detached)
  */
-export function launch(tempDir, exeName, appArgs, detach) {
+export function launch(tempDir, exeName, appArgs, detach, env) {
   const exePath = join(tempDir, exeName);
   if (!existsSync(exePath)) {
     throw new Error(`Executable not found: ${exePath} (did the build/copy run?)`);
@@ -20,9 +21,12 @@ export function launch(tempDir, exeName, appArgs, detach) {
   const argStr = appArgs.length ? ` ${appArgs.join(' ')}` : '';
   console.log(`==> run ${exePath}${argStr}`);
 
+  const childEnv = env ?? process.env;
+
   if (detach) {
     const child = spawn(exePath, appArgs, {
       cwd: tempDir,
+      env: childEnv,
       detached: true,
       stdio: 'ignore',
     });
@@ -32,7 +36,7 @@ export function launch(tempDir, exeName, appArgs, detach) {
   }
 
   return new Promise((resolve, reject) => {
-    const child = spawn(exePath, appArgs, { cwd: tempDir, stdio: 'inherit' });
+    const child = spawn(exePath, appArgs, { cwd: tempDir, env: childEnv, stdio: 'inherit' });
 
     const forward = () => { if (!child.killed) child.kill(); };
     process.on('SIGINT', forward);

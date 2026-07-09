@@ -7,6 +7,7 @@ import { resolveProject } from './resolve.js';
 import { build } from './build.js';
 import { syncOutput } from './copy.js';
 import { launch } from './run.js';
+import { resolveLaunchProfile, splitCommandLine } from './launchProfile.js';
 
 const HELP = `dotnetrun — build a .NET project, copy its output to a temp dir, and run it there.
 
@@ -15,6 +16,7 @@ agents/tools can keep rebuilding.
 
 Usage:
   dotnetrun --project <path> [options] [-- <app args>]
+  dotnetrun --project <path> [options] --args <app args>
 
 Options:
   -p, --project <path>        .csproj file or directory containing one (required)
@@ -24,13 +26,22 @@ Options:
       --no-build              skip build (copy + run only)
       --no-run               build + copy only
       --detach               launch and return (default: attach, stream logs, Ctrl+C stops)
+      --launch-profile <name> apply a profile from Properties/launchSettings.json
+                              (env vars, applicationUrl, commandLineArgs)
+                              default: first profile with commandName "Project"
+                              (same default dotnet run uses)
+      --no-launch-profile     don't apply any launch profile
+      --env <KEY=VALUE>       set an env var on the child (repeatable, highest
+                              precedence — overrides the launch profile)
   -h, --help                 show this help
       --                      forward all following args to the executable
+      --args                  same as --, but survives PowerShell (which drops a bare --)
 
 Examples:
-  dotnetrun --project ./Rephlo.UI
-  dotnetrun -p ./Rephlo.UI -c Release --detach
-  dotnetrun -p ./Rephlo.UI -- --enable-langfuse
+  dotnetrun --project ./TodoApp.UI
+  dotnetrun -p ./TodoApp.UI -c Release --detach
+  dotnetrun -p ./TodoApp.UI -- --enable-langfuse
+  dotnetrun -p ./TodoApp.UI --args --enable-langfuse   # PowerShell-safe
 `;
 
 /**
@@ -78,8 +89,39 @@ export async function run(argv) {
 
   syncOutput(resolved.targetDir, tempDir, mode);
 
+  const profileName = values['launch-profile'];
+  if (profileName && values['no-launch-profile']) {
+    throw new Error('--launch-profile and --no-launch-profile are mutually exclusive');
+  }
+
+  let env;
+  let effectiveAppArgs = appArgs;
+
+  if (!values['no-launch-profile']) {
+    const profile = resolveLaunchProfile(resolved.projectDir, profileName);
+    if (profile) {
+      env = { ...process.env, ...profile.env, DOTNET_LAUNCH_PROFILE: profile.name };
+      if (profile.applicationUrl && !profile.externalUrlConfiguration && !env.ASPNETCORE_URLS) {
+        env.ASPNETCORE_URLS = profile.applicationUrl;
+      }
+      if (appArgs.length === 0 && profile.commandLineArgs) {
+        effectiveAppArgs = splitCommandLine(profile.commandLineArgs);
+      }
+      console.log(`==> launch-profile: ${profile.name}${profileName ? '' : ' (default)'}`);
+    }
+  }
+
+  if (values.env?.length) {
+    env = env ?? { ...process.env };
+    for (const kv of values.env) {
+      const eq = kv.indexOf('=');
+      if (eq === -1) throw new Error(`invalid --env "${kv}" (expected KEY=VALUE)`);
+      env[kv.slice(0, eq)] = kv.slice(eq + 1);
+    }
+  }
+
   if (values.run) {
-    return await launch(tempDir, resolved.exeName, appArgs, values.detach);
+    return await launch(tempDir, resolved.exeName, effectiveAppArgs, values.detach, env);
   }
   console.log('==> skip run (--no-run)');
   return 0;
