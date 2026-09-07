@@ -37,6 +37,7 @@ dotnetrun --project <path> [options] --args <app args>
 | Option | Default | Description |
 | --- | --- | --- |
 | `-p, --project <path>` | — (required) | `.csproj` file, or a directory containing exactly one |
+| `-b, --branch <name>` | | Run against the Git worktree registered for `<name>` — `--project`/`--temp` resolve relative to that worktree, as if you'd `cd`'d there first |
 | `-c, --configuration <cfg>` | `Debug` | `Debug` or `Release` |
 | `--temp <path>` | `<tempRoot>/<name>-dev` | Explicit run directory |
 | `--sync <additive\|mirror>` | `additive` | `additive` keeps extra files; `mirror` purges them (robocopy `/MIR`) |
@@ -49,6 +50,12 @@ dotnetrun --project <path> [options] --args <app args>
 | `-h, --help` | | Show help |
 | `--` | | Everything after is forwarded to the executable |
 | `--args` | | Same as `--`, but safe in PowerShell (see note below) |
+
+> **`-b, --branch`:** looks up `<name>` among the Git worktrees already
+> registered for the current repository (`git worktree list`) and runs as if
+> you'd `cd`'d into that worktree first. It does not create, remove, or
+> switch worktrees — the branch must already be checked out in one via
+> `git worktree add <path> <branch>`.
 
 > **PowerShell note:** npm's generated `.ps1` shim has no `param()` block, so
 > args flow through PowerShell's automatic `$args` array — and PowerShell
@@ -90,6 +97,10 @@ Logs stream to the console by default. In attached mode, `Ctrl+C` stops the app.
 ```sh
 # Build Debug, copy, attach and stream logs
 dotnetrun --project ./TodoApp.UI
+
+# Run against a branch checked out in a registered Git worktree, without
+# cd'ing there first — --project resolves relative to that worktree
+dotnetrun -b feature/login --project ./TodoApp.UI
 
 # Release, launch detached
 dotnetrun -p ./TodoApp.UI -c Release --detach

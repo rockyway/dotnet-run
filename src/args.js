@@ -36,6 +36,7 @@ export function parseCliArgs(argv) {
     allowPositionals: false,
     options: {
       project: { type: 'string', short: 'p' },
+      branch: { type: 'string', short: 'b' },
       configuration: { type: 'string', short: 'c', default: 'Debug' },
       temp: { type: 'string' },
       sync: { type: 'string', default: 'additive' },

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, isAbsolute, resolve as resolvePath } from 'node:path';
 
 import { parseCliArgs } from './args.js';
+import { resolveWorktree } from './worktree.js';
 import { resolveProject } from './resolve.js';
 import { build } from './build.js';
 import { syncOutput } from './copy.js';
@@ -20,6 +21,8 @@ Usage:
 
 Options:
   -p, --project <path>        .csproj file or directory containing one (required)
+  -b, --branch <name>         run against the Git worktree registered for <name>
+                              (--project, --temp resolve relative to that worktree)
   -c, --configuration <cfg>   Debug | Release            (default: Debug)
       --temp <path>           explicit run dir           (default: <tempRoot>/<name>-dev)
       --sync <additive|mirror> copy mode                 (default: additive)
@@ -39,6 +42,7 @@ Options:
 
 Examples:
   dotnetrun --project ./TodoApp.UI
+  dotnetrun -b feature/login --project ./TodoApp.UI
   dotnetrun -p ./TodoApp.UI -c Release --detach
   dotnetrun -p ./TodoApp.UI -- --enable-langfuse
   dotnetrun -p ./TodoApp.UI --args --enable-langfuse   # PowerShell-safe
@@ -66,6 +70,12 @@ export async function run(argv) {
   if (!values.project) {
     process.stdout.write(HELP);
     throw new Error('--project is required');
+  }
+
+  if (values.branch) {
+    const worktreeDir = resolveWorktree(values.branch, process.cwd());
+    console.log(`==> branch  : ${values.branch} (${worktreeDir})`);
+    process.chdir(worktreeDir);
   }
 
   const configuration = normalizeConfiguration(values.configuration);
